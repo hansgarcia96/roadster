@@ -5,6 +5,8 @@ let currentGame;
 let currentRoadster;
 let frames = 0;
 
+// document.getElementById("game-canvas").style.display = "none";
+
 const myCanvas = document.getElementById('canvas');
 const ctx = myCanvas.getContext("2d");
 
@@ -26,6 +28,7 @@ class Roadster {
         this.width = 125;
         this.height = 100;
         this.img = "./images/roadster.png"
+        this.explosion = "./images/explosion.png"
     }
     drawRoadster() {
         let roadsterImg = new Image();
@@ -77,6 +80,7 @@ class Obstacles {
     }
     drawObstacle() {
         ctx.drawImage(this.obstaclesImg, this.x, this.y, this.width, this.height);
+
     }
     moveObstacle() {
         this.x -= 12;
@@ -84,18 +88,6 @@ class Obstacles {
             this.x = myCanvas.width;
             this.y = Math.floor((Math.random() * 550) + 1);
         }
-    }
-    getLeft() {
-        return this.x;
-    }
-    getRight() {
-        return this.x + this.width;
-    }
-    getTop() {
-        return this.y;
-    }
-    getBottom() {
-        return this.y + this.height;
     }
 }; // end Obstacles class
 
@@ -141,7 +133,7 @@ setInterval(function(){
 function startGame(){
     currentGame = new Game();
     currentRoadster = new Roadster();
-    currentObstacle = new Obstacles()
+    currentObstacle = new Obstacles();
 
     currentGame.roadster = currentRoadster;
     currentRoadster.drawRoadster();
@@ -155,31 +147,26 @@ function startGame(){
 
 startGame();
 
+// ---------- GAME OVER ----------
+
+function gameOver() {
+    
+    // ctx.clearRect(0, 0, 1250, 650);
+    cancelAnimationFrame()
+    setTimeout(300)
+}
+
 // ----------- COLLISION -----------
 
-// function getXVector(){}
-
-// function getYVector(){}
-
-
-function detectCollision(roadster, obstacle){
-    let x1 = roadster.x;
-    let x2 = obstacle.x;
-    let y1 = roadster.y;
-    let y2 = obstacle.y;
-
-    let xv = x1 - x2;
-        console.log( "xv " + xv)
-    let yv = y1 - y2;
-        console.log("yv " + yv)
-    if (xv < x1 + x2 && yv < y1 + y2) {
-        // return true;
-        
-   return false;
-    }
-}; // end collision function
-
-
+function detectIntersection(obst, roadster) {
+    if(obst.x < roadster.x + roadster.width &&
+        obst.x + obst.width > roadster.x &&
+        obst.y < roadster.y + roadster.height &&
+        obst.y + obst.width > roadster.y){
+            roadster.img = roadster.explosion;
+            // gameOver()
+        } 
+}
 
 // ---------- UPDATE ---------
 
@@ -215,10 +202,15 @@ function update(){
     frames ++;
 
     // ---------- COLLISION ---------
-    detectCollision(currentRoadster, currentObstacle);
+    if(detectIntersection(currentObstacle, currentRoadster)){
+        console.log("gameOver")
+        gameOver()
+    };
     // run collision by frame according to Jack
 
     requestAnimationFrame(update);
 }
+
+console.log(frames)
 
 
